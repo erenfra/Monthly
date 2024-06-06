@@ -41,27 +41,32 @@ struct DayEntry: TimelineEntry {
 
 struct MonthlyWidgetEntryView : View {
   var entry: DayEntry
+  var config: MonthConfig
+
+  init(entry: DayEntry) {
+    self.entry = entry
+    self.config = MonthConfig.determineConfig(from: entry.date)
+  }
 
   var body: some View {
-    ZStack {
-      ContainerRelativeShape()
-        .fill(.gray.gradient)
-
-      VStack {
-        HStack(spacing: 4) {
-          Text("⛄️")
-            .font(.title)
-          Text(entry.date.formatted(.dateTime.weekday(.wide)))
-            .font(.title3.bold())
-            .minimumScaleFactor(0.6)
-            .foregroundStyle(Color.black.opacity(0.6))
-          Spacer()
-        }
-        Text(entry.date.formatted(.dateTime.day()))
-          .font(.system(size: 80, weight: .heavy))
-          .foregroundStyle(Color.white.opacity(0.8))
+    VStack {
+      HStack(spacing: 4) {
+        Text(config.emojiText)
+          .font(.title)
+        Text(entry.date.formatted(.dateTime.weekday(.wide)))
+          .font(.title3.bold())
+          .minimumScaleFactor(0.6)
+          .foregroundStyle(config.weekdayTextColor)
+        Spacer()
       }
+      Text(entry.date.formatted(.dateTime.day()))
+        .font(.system(size: 80, weight: .heavy))
+        .foregroundStyle(config.dayTextColor)
+    }.containerBackground(for: .widget) {
+      ContainerRelativeShape()
+        .fill(config.backgroundColor.gradient)
     }
+
   }
 }
 
@@ -70,14 +75,15 @@ struct MonthlyWidget: Widget {
 
   var body: some WidgetConfiguration {
     StaticConfiguration(kind: kind, provider: Provider()) { entry in
-      if #available(iOS 17.0, *) {
-        MonthlyWidgetEntryView(entry: entry)
-          .containerBackground(.fill.tertiary, for: .widget)
-      } else {
-        MonthlyWidgetEntryView(entry: entry)
-          .padding()
-          .background()
-      }
+      MonthlyWidgetEntryView(entry: entry)
+//      if #available(iOS 17.0, *) {
+//        MonthlyWidgetEntryView(entry: entry)
+//          .containerBackground(.fill.tertiary, for: .widget)
+//      } else {
+//        MonthlyWidgetEntryView(entry: entry)
+//          .padding()
+//          .background()
+//      }
     }
     .configurationDisplayName("Monthly Style Widget")
     .description("The theme of the widget changes based on month.")
